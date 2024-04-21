@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using Acmebot.Provider.Loopia.Exceptions;
 
-namespace Acmebot.Provider.Loopia
+namespace Acmebot.Provider.Loopia.Loopia
 {
     public class LoopiaClient
     {
@@ -55,7 +49,7 @@ namespace Acmebot.Provider.Loopia
                 .ToArray();
         }
 
-        public async Task<string> AddZoneRecord(string domain, string subDomain, string data, int ttl)
+        public async Task<string?> AddZoneRecord(string domain, string subDomain, string data, int ttl)
         {
             var sb = new StringBuilder();
             sb.Append("<param><value><struct>");
@@ -67,18 +61,18 @@ namespace Acmebot.Provider.Loopia
             return GetStringResult(await PostRequest("addZoneRecord", domain, subDomain, sb.ToString()));
         }
 
-        public async Task<string> RemoveZoneRecord(string domain, string subDomain, int recordId)
+        public async Task<string?> RemoveZoneRecord(string domain, string subDomain, int recordId)
         {
             var data = $"<param><value><i4>{recordId}</i4></value></param>";
             return GetStringResult(await PostRequest("removeZoneRecord", domain, subDomain, data));
         }
 
-        public async Task<string> RemoveSubDomain(string domain, string subDomain) => GetStringResult(await PostRequest("removeSubdomain", domain, subDomain));
+        public async Task<string?> RemoveSubDomain(string domain, string subDomain) => GetStringResult(await PostRequest("removeSubdomain", domain, subDomain));
 
-        private static string GetStringResult(string result)
+        private static string? GetStringResult(string result)
         {
             using TextReader reader = new StringReader(result);
-            return XDocument.Load(reader).XPathSelectElement("/methodResponse/params/param/value/string").Value;
+            return XDocument.Load(reader).XPathSelectElement("/methodResponse/params/param/value/string")?.Value;
         }
 
         private async Task<string> PostRequest(
@@ -113,18 +107,21 @@ namespace Acmebot.Provider.Loopia
 
             sb.Append("</params></methodCall>");
             var result = await _httpClient.PostAsync(Url, new StringContent(sb.ToString(), Encoding.UTF8));
-            var content= await result.Content.ReadAsStringAsync();
+            var content = await result.Content.ReadAsStringAsync();
             if (content.Contains("<methodResponse><fault>"))
                 throw new CustomLoopiaException(content);
 
             return content;
         }
 
-        private static int GetInt(IEnumerable<XElement> member, string name) => int.Parse(GetValue(member, name, "int"));
-        private static string GetString(IEnumerable<XElement> member, string name) => GetValue(member, name, "string");
-        private static string GetValue(IEnumerable<XElement> member, string name, string type) => member
-            .Single(z => z.Element("name").Value == name)
-            .XPathSelectElement($"value/{type}").Value;
+        private static int GetInt(IEnumerable<XElement> member, string name) => int.Parse(GetValue(member, name, "int")!);
+        private static string GetString(IEnumerable<XElement> member, string name) => GetValue(member, name, "string")!;
+        private static string? GetValue(IEnumerable<XElement> member, string name, string type)
+        {
+            return member
+                .Single(z => z.Element("name")!.Value == name)
+                .XPathSelectElement($"value/{type}")?.Value;
+        }
     }
 
 

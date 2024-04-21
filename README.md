@@ -23,5 +23,10 @@ Sign in to Loopia and and click *API-användare* in the bottom right corner. Cli
 
 Set the username and password under the Loopia Azure Function configurations:
 
-    Loopia:Password=<Loopia Username>
-    Loopia:Username=<Loopia Password>
+    Loopia__0__Username=<Loopia Username>
+    Loopia__0__Password=<Loopia Password>
+
+You can add as many accounts as you want:
+
+    Loopia__1__Username=<Loopia Username>
+    Loopia__1__Password=<Loopia Password>

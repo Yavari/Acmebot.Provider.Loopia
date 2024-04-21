@@ -364,3 +364,4 @@ FodyWeavers.xsd
 # Azure Resource Manager dependency files
 ServiceDependencies/
 /src/Acmebot.Provider.Loopia/local.settings.json
+/src/Acmebot.Provider.Loopia/Properties/serviceDependencies.*
